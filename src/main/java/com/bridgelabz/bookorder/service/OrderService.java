@@ -31,15 +31,15 @@ public class OrderService implements IOrderService {
 	
 	@Override
 	public ResponseDTO placeOrder(String token, OrderDTO orderDto) {
-		boolean verify = restTemplate.getForObject("http://localhost:8082/user/verify?token="+token, Boolean.class);
+		boolean verify = restTemplate.getForObject("http://BOOK-USER/user/verify?token="+token, Boolean.class);
 		if(verify) {
 			BookOrder bookOrder = modelmapper.map(orderDto, BookOrder.class);
-			Book book = restTemplate.getForObject("http://localhost:8085/book/getBook/"+orderDto.getBookId()+"?token="+token,Book.class);
+			Book book = restTemplate.getForObject("http://BOOKSTORE-BOOK/book/getBook/"+orderDto.getBookId()+"?token="+token,Book.class);
 			System.out.println(book.toString());
 			if(book != null) {
 				if(book.getBookQuantity() > bookOrder.getQuantity()) {
 					int quantity = book.getBookQuantity() - bookOrder.getQuantity();
-					restTemplate.getForObject("http://localhost:8085/book/changequantity?token="+token+"&id="+orderDto.getBookId()+"&quantity="+quantity,Book.class);
+					restTemplate.getForObject("http://BOOKSTORE-BOOK/book/changequantity?token="+token+"&id="+orderDto.getBookId()+"&quantity="+quantity,Book.class);
 					bookOrder.setPrice(book.getBookPrice()*orderDto.getQuantity());
 					bookOrder.setUserId(jwtToken.decodeToken(token));
 					bookOrder.setOrderDate(LocalDate.now());
@@ -56,7 +56,7 @@ public class OrderService implements IOrderService {
 
 	@Override
 	public ResponseDTO getAllOrder(String token) {
-		boolean verify = restTemplate.getForObject("http://localhost:8082/user/verify?token="+token, Boolean.class);
+		boolean verify = restTemplate.getForObject("http://BOOK-USER/user/verify?token="+token, Boolean.class);
 		if(verify) {
 			List<BookOrder> bookOrders = bookRepository.findAll();
 			if(bookOrders!=null) {
@@ -69,7 +69,7 @@ public class OrderService implements IOrderService {
 
 	@Override
 	public ResponseDTO getOrderById(String token, Long id) {
-		boolean verify = restTemplate.getForObject("http://localhost:8082/user/verify?token="+token, Boolean.class);
+		boolean verify = restTemplate.getForObject("http://BOOK-USER/user/verify?token="+token, Boolean.class);
 		if(verify) {
 			Optional<BookOrder> isPresenet = bookRepository.findById(id);
 			if(isPresenet.isPresent()) {
@@ -82,7 +82,7 @@ public class OrderService implements IOrderService {
 
 	@Override
 	public void cancelOrderById(String token, Long id) {
-		boolean verify = restTemplate.getForObject("http://localhost:8082/user/verify?token="+token, Boolean.class);
+		boolean verify = restTemplate.getForObject("http://BOOK-USER/user/verify?token="+token, Boolean.class);
 		if(verify) {
 			Optional<BookOrder> bookOrder = bookRepository.findById(id);
 			if(bookOrder.isPresent()) {
